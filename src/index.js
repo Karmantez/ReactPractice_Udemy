@@ -6,7 +6,7 @@ import SearchBar from './components/search_bar';
 import VideoList from './components/video_list';
 
 // Youtube Data API v3
-const API_KEY = 'AIzaSyAVn7wD7j7vr4Rqc-x7j6SyyIZ6sKQ0iNw';
+const API_KEY = 'INPUT_YOUTUBE_API_KEY';
 
 // Create a new component. This component should produce
 // some HTML
