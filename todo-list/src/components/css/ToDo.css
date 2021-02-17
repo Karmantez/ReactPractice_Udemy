@@ -1,0 +1,16 @@
+.todo-container {
+  display: flex;
+  justify-content: space-around;
+}
+
+.todo-container:nth-child(1) {
+  flex-grow: 1;
+}
+
+.todo-container:nth-child(2) {
+  flex-grow: 2;
+}
+
+.todo-container:nth-child(3) {
+  flex-grow: 1;
+}
