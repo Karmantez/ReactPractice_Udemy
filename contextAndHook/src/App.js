@@ -11,6 +11,8 @@ import UseCallBack from './components/callBack/UseCallBack';
 import UseReducer from './components/reducer/UseReducer';
 import Parent from './components/imperativeHandle/Parent';
 import UseLayoutEffect from './components/layoutEffect/UseLayoutEffect';
+import UseEffect from './components/effect/UseEffect';
+import Key from './components/important/Key';
 
 function App() {
   return (
@@ -48,6 +50,16 @@ function App() {
       <div style={{ marginTop: '100px' }}>
         <h1>UseLayoutEffect</h1>
         <UseLayoutEffect />
+      </div>
+
+      <div style={{ marginTop: '150px' }}>
+        <h1>UseEffect</h1>
+        <UseEffect />
+      </div>
+
+      <div style={{ marginTop: '150px' }}>
+        <h1>Key의 중요성</h1>
+        {/* <Key /> */}
       </div>
     </div>
   );
