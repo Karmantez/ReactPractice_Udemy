@@ -2,7 +2,7 @@ import React, { useEffect, useReducer } from 'react';
 import { shallowEqual, useDispatch, useSelector } from 'react-redux';
 import store from '../../common/store';
 import { getNextFriend } from '../../common/mockData';
-import { addFriend, setAgeLimit, setShowLimit } from '../state';
+import { addFriend, setValue } from '../state';
 import {
   getAgeLimit,
   getShowLimit,
@@ -82,14 +82,16 @@ export default function FriendMain() {
       </button>
       {/* <FriendList friends={friends} /> */}
       <NumberSelect
-        onChange={(v) => dispatch(setAgeLimit(v))}
+        // onChange={(v) => dispatch(setAgeLimit(v))}
+        onChange={(v) => dispatch(setValue('ageLimit', v))}
         value={ageLimit}
         options={AGE_LIMIT_OPTIONS}
         postfix="세 이하만 보기"
       />
       <FriendList friends={friendsWithAgeLimit} />
       <NumberSelect
-        onChange={(v) => dispatch(setShowLimit(v))}
+        // onChange={(v) => dispatch(setShowLimit(v))}
+        onChange={(v) => dispatch(setValue('showLimit', v))}
         value={showLimit}
         options={SHOW_LIMIT_OPTIONS}
         postfix="명 이하만 보기 (연령 제한 적용)"
