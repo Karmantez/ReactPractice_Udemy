@@ -18,6 +18,7 @@ function makeCheckSlowSaga(actionType, fetchKey) {
   };
 }
 
+// eslint-disable-next-line new-cap
 const apiCache = new lruCache({
   max: 500,
   maxAge: 1000 * 60 * 2,
@@ -27,11 +28,50 @@ const SAGA_CALL_TYPE = call(() => {}).type;
 function getIsCallEffect(value) {
   return value && value.type === SAGA_CALL_TYPE;
 }
-export function makeFetchSaga({
-  fetchSaga,
-  canCache,
-  getTotalCount = res => res?.totalCount,
-}) {
+
+// 쿼리 파라미터 순서가 바뀌어도 같은 key가 나오도록 키 이름으로 정렬한다
+export function getApiCacheKey(actionType, { apiHost, url, params }) {
+  const prefix = `${actionType}_${apiHost ? apiHost + url : url}`;
+  const keys = params ? Object.keys(params) : [];
+  if (keys.length) {
+    return prefix + keys.sort().reduce((acc, key) => `${acc}&${key}=${params[key]}`, '');
+  }
+  return prefix;
+}
+
+export function getFetchKey(action) {
+  const fetchKey = action[FETCH_KEY];
+  return fetchKey === undefined ? action.type : String(fetchKey);
+}
+
+function getIsGeneratorFunction(obj) {
+  const { constructor } = obj;
+  if (!constructor) {
+    return false;
+  }
+  if (constructor.name === 'GeneratorFunction' || constructor.displayName === 'GeneratorFunction') {
+    return true;
+  }
+  const proto = constructor.prototype;
+  return typeof proto.next === 'function' && typeof proto.throw === 'function';
+}
+
+/**
+ *
+ * @param {string=} actionType
+ */
+export function deleteApiCache(actionType) {
+  let keys = apiCache.keys();
+  if (actionType) {
+    keys = keys.filter(key => key.includes(actionType));
+  }
+  // eslint-disable-next-line no-restricted-syntax
+  for (const key of keys) {
+    apiCache.del(key);
+  }
+}
+
+export function makeFetchSaga({ fetchSaga, canCache, getTotalCount = res => res?.totalCount }) {
   return function* (action) {
     const { type: actionType } = action;
     const fetchPage = action[FETCH_PAGE];
@@ -50,6 +90,7 @@ export function makeFetchSaga({
       if (getIsCallEffect(value) && getIsGeneratorFunction(value.payload.fn)) {
         iterStack.push(iter);
         iter = value.payload.fn(...value.payload.args);
+        // eslint-disable-next-line no-continue
         continue;
       }
       if (getIsCallEffect(value) && value.payload.fn === callApi) {
@@ -62,10 +103,7 @@ export function makeFetchSaga({
         );
         const apiParam = value.payload.args[0];
         const cacheKey = getApiCacheKey(actionType, apiParam);
-        let apiResult =
-          canCache && apiCache.has(cacheKey)
-            ? apiCache.get(cacheKey)
-            : undefined;
+        let apiResult = canCache && apiCache.has(cacheKey) ? apiCache.get(cacheKey) : undefined;
         const isFromCache = !!apiResult;
         if (!isFromCache) {
           if (!apiResult) {
@@ -78,7 +116,7 @@ export function makeFetchSaga({
         }
         res = apiResult;
         if (apiResult) {
-          const isSuccess = apiResult.isSuccess;
+          const { isSuccess } = apiResult;
           if (isSuccess && canCache && !isFromCache) {
             apiCache.set(cacheKey, apiResult);
           }
@@ -99,6 +137,7 @@ export function makeFetchSaga({
         const nextIter = iterStack.pop();
         if (nextIter) {
           iter = nextIter;
+          // eslint-disable-next-line no-continue
           continue;
         }
 
@@ -109,52 +148,4 @@ export function makeFetchSaga({
       }
     }
   };
-}
-
-// 쿼리 파라미터 순서가 바뀌어도 같은 key가 나오도록 키 이름으로 정렬한다
-export function getApiCacheKey(actionType, { apiHost, url, params }) {
-  const prefix = `${actionType}_${apiHost ? apiHost + url : url}`;
-  const keys = params ? Object.keys(params) : [];
-  if (keys.length) {
-    return (
-      prefix +
-      keys.sort().reduce((acc, key) => `${acc}&${key}=${params[key]}`, '')
-    );
-  } else {
-    return prefix;
-  }
-}
-
-export function getFetchKey(action) {
-  const fetchKey = action[FETCH_KEY];
-  return fetchKey === undefined ? action.type : String(fetchKey);
-}
-
-function getIsGeneratorFunction(obj) {
-  const constructor = obj.constructor;
-  if (!constructor) {
-    return false;
-  }
-  if (
-    'GeneratorFunction' === constructor.name ||
-    'GeneratorFunction' === constructor.displayName
-  ) {
-    return true;
-  }
-  const proto = constructor.prototype;
-  return 'function' === typeof proto.next && 'function' === typeof proto.throw;
-}
-
-/**
- *
- * @param {string=} actionType
- */
-export function deleteApiCache(actionType) {
-  let keys = apiCache.keys();
-  if (actionType) {
-    keys = keys.filter(key => key.includes(actionType));
-  }
-  for (const key of keys) {
-    apiCache.del(key);
-  }
 }

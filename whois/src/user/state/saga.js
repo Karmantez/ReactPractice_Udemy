@@ -1,9 +1,9 @@
 import { all, call, put, takeEvery } from 'redux-saga/effects';
 import { ACTIONS, TYPES } from '.';
 import { callApi } from '../../common/util/api';
+import { makeFetchSaga } from '../../common/util/fetch';
 
 function* fetchUser({ name }) {
-  console.log(name);
   const { isSuccess, data } = yield call(callApi, {
     url: '/user/search',
     params: { keyword: name },
@@ -17,6 +17,8 @@ function* fetchUser({ name }) {
   }
 }
 
-export default function* () {
-  yield all([takeEvery(TYPES.FETCH_USER, fetchUser)]);
+export default function* saga() {
+  yield all([
+    takeEvery(TYPES.FETCH_USER, makeFetchSaga({ fetchSaga: fetchUser, canCache: false })),
+  ]);
 }
