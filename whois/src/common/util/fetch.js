@@ -6,7 +6,7 @@ import { actions } from '../state';
 import { FETCH_PAGE, FETCH_KEY } from '../redux-helper';
 
 function makeCheckSlowSaga(actionType, fetchKey) {
-  return function* () {
+  return function* ret() {
     yield delay(500);
     yield put(
       actions.setIsSlow({
@@ -72,7 +72,7 @@ export function deleteApiCache(actionType) {
 }
 
 export function makeFetchSaga({ fetchSaga, canCache, getTotalCount = res => res?.totalCount }) {
-  return function* (action) {
+  return function* ret(action) {
     const { type: actionType } = action;
     const fetchPage = action[FETCH_PAGE];
     const fetchKey = getFetchKey(action);

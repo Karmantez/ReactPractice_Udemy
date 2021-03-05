@@ -3,6 +3,7 @@ import { createReducer, createSetValueAction, setValueReducer } from '../../comm
 export const TYPES = {
   SET_VALUE: 'search/SET_VALUE',
   FETCH_AUTOCOMPLETE: 'search/FETCH_AUTOCOMPLETE',
+  FETCH_ALL_HISTORY: 'search/FETCH_ALL_HISTORY',
 };
 
 export const ACTIONS = {
@@ -11,11 +12,13 @@ export const ACTIONS = {
     type: TYPES.FETCH_AUTOCOMPLETE,
     keyword,
   }),
+  fetchAllHistory: () => ({ type: TYPES.FETCH_ALL_HISTORY }),
 };
 
 const INITIAL_STATE = {
   keyword: '',
   autoCompletes: [],
+  history: [],
 };
 
 const reducer = createReducer(INITIAL_STATE, {
